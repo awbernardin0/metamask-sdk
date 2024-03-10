@@ -5,9 +5,9 @@
  * @format
  */
 
-import React, {useEffect} from 'react';
+import React, { useEffect } from 'react';
 
-import {COMM_SERVER_URL, INFURA_API_KEY} from '@env';
+import { COMM_SERVER_URL, INFURA_API_KEY } from '@env';
 import {
   MetaMaskProvider,
   SDKConfigProvider,
@@ -21,12 +21,20 @@ import {
 import {
   AppState,
   AppStateStatus,
+  Image,
   Linking,
   LogBox,
   Platform,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import BackgroundTimer from 'react-native-background-timer';
 import RootNavigator from './src/RootNavigator';
+import { Authenticator, useAuthenticator } from '@aws-amplify/ui-react-native';
+import { Button } from 'react-native';
 
 LogBox.ignoreLogs([
   'Possible Unhandled Promise Rejection',
@@ -40,7 +48,7 @@ LogBox.ignoreLogs([
 // hence usage of a global variable.
 let canOpenLink = true;
 
-const WithSDKConfig = ({children}: {children: React.ReactNode}) => {
+const WithSDKConfig = ({ children }: { children: React.ReactNode }) => {
   const {
     socketServer,
     infuraAPIKey,
@@ -93,6 +101,12 @@ const WithSDKConfig = ({children}: {children: React.ReactNode}) => {
   );
 };
 
+
+function SignOutButton() {
+  const { signOut } = useAuthenticator();
+  return <SafeAreaView><Button title="Sign Out" onPress={signOut} /></SafeAreaView>;
+}
+
 export const SafeApp = () => {
   const navigationRef = useNavigationContainerRef();
 
@@ -119,7 +133,11 @@ export const SafeApp = () => {
       initialInfuraKey={INFURA_API_KEY}>
       <WithSDKConfig>
         <NavigationContainer ref={navigationRef} onReady={handleNavReady}>
-          <RootNavigator />
+          <Authenticator.Provider>
+            <Authenticator>
+              <SignOutButton />
+            </Authenticator>
+          </Authenticator.Provider>
         </NavigationContainer>
       </WithSDKConfig>
     </SDKConfigProvider>
